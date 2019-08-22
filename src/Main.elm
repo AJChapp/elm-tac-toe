@@ -4,18 +4,22 @@ import Array exposing(Array)
 import Array
 import Browser
 import List exposing (range)
-import Html exposing (Html, button, div, h1, h2, text)
+import Html exposing (Html, button, div, h1, h2, text, h4)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.document { init = init, update = update, view = view , subscriptions = \_ -> Sub.none}
 
 
 
 --Model
 
+type alias Document msg =
+  { title : String
+  , body : List (Html msg)
+  }
 
 type alias Model =
   { boardState : BoardState
@@ -45,15 +49,16 @@ type GameStatus
   | Nobody
 
 
+init : () -> ( Model, Cmd Msg )
+init _ = 
+  ( { boardState = cleanBoard 
+  , gameStatus = Nobody 
+  , currentPlayer = PlayerX }, Cmd.none)
+
+
 cleanBoard : Array SquareValue
 cleanBoard = Array.initialize 9 (always Empty)
 
-
-init : Model
-init =
-  { boardState = cleanBoard 
-  , gameStatus = Nobody 
-  , currentPlayer = PlayerX }
 
 
 playerMark : Player -> SquareValue
@@ -96,13 +101,12 @@ viewBoardRow board index =
     rangeStart = (index - 1) * 3 
     rangeEnd = index * 3 - 1
   in 
-    div [ class "row" ] [ 
-      div [] (range rangeStart rangeEnd |> List.map (viewBoardButton board))
-    ]
+    div [ class "row" ] (range rangeStart rangeEnd |> List.map (viewBoardButton board))
+
 
 viewBoardButton : BoardState -> Int -> Html Msg
 viewBoardButton board index =
-  button [ class "button", style "background-color" "red", onClick (Mark index) ] [ Array.get index board |> viewBoardButtonText |> text ]
+  button [ class ("square square-" ++ (String.fromInt index)), style "background-color" "red", onClick (Mark index) ] [ Array.get index board |> viewBoardButtonText |> text ]
 
 
 viewBoardButtonText : Maybe SquareValue -> String
@@ -164,28 +168,30 @@ viewGameStatusText gameStatus =
 
 --Update
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg)
 update msg model =
   case msg of
     Reset ->
-      { model 
+      ( { model 
       | boardState = cleanBoard 
       , gameStatus = Nobody 
-      , currentPlayer = PlayerX }
+      , currentPlayer = PlayerX } , Cmd.none )
 
     Mark index ->
-      playTurn model index
+      ( (playTurn model index), Cmd.none )
 
 
 --View
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-  div [ class "main" ]
-    [ div []
-      [ h1 [] [ text "Tic Tac Toe" ]
-      , h2 [ class "game-status" ] [ text (viewGameStatusText model.gameStatus) ]
+  { title = "Elm-Tac-Toe"
+  , body = [ div [ class "main" ]
+    [ div [ class "game-header" ]
+      [ h1 [ class "game-header-title"] [ text "Elm-Tac-Toe" ]
+      , h4 [ class "game-header-status-title" ] [ text "Status" ] 
+      , h2 [ class "game-header-status-content" ] [ text (viewGameStatusText model.gameStatus) ]
       , button [ onClick Reset] [ text "Reset" ]
       ]
-    , div [] (range 1 3 |> List.map (viewBoardRow model.boardState))
-    ]
+    , div [ class "game-content" ] (range 1 3 |> List.map (viewBoardRow model.boardState))
+    ] ]}
