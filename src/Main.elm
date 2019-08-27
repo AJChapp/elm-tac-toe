@@ -12,8 +12,6 @@ import Html.Events exposing (onClick)
 main =
   Browser.document { init = init, update = update, view = view , subscriptions = \_ -> Sub.none}
 
-
-
 --Model
 
 type alias Document msg =
@@ -47,6 +45,7 @@ type GameStatus
   = XWins
   | OWins
   | Nobody
+  | Tie 
 
 
 init : () -> ( Model, Cmd Msg )
@@ -68,8 +67,8 @@ playerMark player =
     PlayerO -> O
 
 
-nextPlayer : Player -> Player
-nextPlayer player =
+changePlayer : Player -> Player
+changePlayer player =
   case player of
     PlayerX -> PlayerO
     PlayerO -> PlayerX
@@ -78,7 +77,25 @@ nextPlayer player =
 playTurn : Model -> Int -> Model
 playTurn model index =
   let
-    newBoardA = Array.set index (playerMark model.currentPlayer) model.boardState
+    newBoardA = 
+      case (Array.get index model.boardState) of
+        Just squareValue -> 
+          case squareValue of
+            X -> 
+              model.boardState
+            O -> 
+              model.boardState
+            Empty ->  
+              Array.set index (playerMark model.currentPlayer) model.boardState
+        Nothing ->
+          model.boardState
+
+    nextPlayer = 
+      if model.boardState == newBoardA then 
+        model.currentPlayer
+      else 
+        changePlayer model.currentPlayer
+    
     gameStatus = checkGameStatus newBoardA winCombos
     newBoardB =
       case gameStatus of
@@ -86,14 +103,27 @@ playTurn model index =
           Array.initialize 9 (always X)
         OWins -> 
           Array.initialize 9 (always O)
+        Tie ->
+          Array.initialize 9 (always Empty)
         Nobody -> 
           newBoardA
   in
     { model
     | gameStatus = gameStatus
     , boardState = newBoardB
-    , currentPlayer = (nextPlayer model.currentPlayer)
+    , currentPlayer = nextPlayer
     }
+
+isSquareOccupied : SquareValue -> Bool
+isSquareOccupied state =
+  case state of
+    X -> 
+      True
+    O ->
+      True
+    Empty ->
+      False
+
 
 viewBoardRow : BoardState -> Int -> Html Msg
 viewBoardRow board index =
@@ -136,7 +166,7 @@ winCombos =
 checkGameStatus : BoardState -> List (Int,Int,Int) -> GameStatus
 checkGameStatus board uncheckedWinCombos =
   case uncheckedWinCombos of 
-    [] -> 
+    [] ->
       Nobody
 
     head::tail -> 
@@ -150,6 +180,9 @@ checkGameStatus board uncheckedWinCombos =
           else if (Array.get a board) == Just O && (Array.get b board)  == Just O && (Array.get c board) == Just O then
             OWins
 
+          else if Array.length (Array.filter isSquareOccupied board) == Array.length board then
+            Tie
+          
           else 
             checkGameStatus board tail
 
@@ -165,6 +198,8 @@ viewGameStatusText gameStatus =
     OWins -> 
       "O Wins!!!"
 
+    Tie ->
+      "No Winners :("
 
 --Update
 
