@@ -4,7 +4,7 @@ import Array exposing(Array)
 import Array
 import Browser
 import List exposing (range)
-import Html exposing (Html, button, div, h1, h2, text, h4)
+import Html exposing (Html, button, div, h1, h3, text, h4)
 import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 
@@ -58,7 +58,13 @@ init _ =
 cleanBoard : Array SquareValue
 cleanBoard = Array.initialize 9 (always Empty)
 
-
+--This is two decorate the board when a tie is reached.
+makeTieBoard: Int -> SquareValue
+makeTieBoard index =
+  if (remainderBy 2 index ) > 0 then 
+    O
+  else 
+    X
 
 playerMark : Player -> SquareValue
 playerMark player =
@@ -104,7 +110,7 @@ playTurn model index =
         OWins -> 
           Array.initialize 9 (always O)
         Tie ->
-          Array.initialize 9 (always Empty)
+          Array.initialize 9 makeTieBoard
         Nobody -> 
           newBoardA
   in
@@ -136,7 +142,7 @@ viewBoardRow board index =
 
 viewBoardButton : BoardState -> Int -> Html Msg
 viewBoardButton board index =
-  button [ class ("square square-" ++ (String.fromInt index)), style "background-color" "red", onClick (Mark index) ] [ Array.get index board |> viewBoardButtonText |> text ]
+  div [ class ("square square-" ++ (String.fromInt index)), onClick (Mark index) ] [ Array.get index board |> viewBoardButtonText |> text ]
 
 
 viewBoardButtonText : Maybe SquareValue -> String
@@ -146,7 +152,7 @@ viewBoardButtonText maybeSquare =
       case squareValue of
         X -> "X"
         O -> "O"
-        Empty -> "-"
+        Empty -> ""
     Nothing ->
       ""
 
@@ -225,8 +231,8 @@ view model =
     [ div [ class "game-header" ]
       [ h1 [ class "game-header-title"] [ text "Elm-Tac-Toe" ]
       , h4 [ class "game-header-status-title" ] [ text "Status" ] 
-      , h2 [ class "game-header-status-content" ] [ text (viewGameStatusText model.gameStatus) ]
-      , button [ onClick Reset] [ text "Reset" ]
+      , h3 [ class "game-header-status-content" ] [ text (viewGameStatusText model.gameStatus) ]
       ]
     , div [ class "game-content" ] (range 1 3 |> List.map (viewBoardRow model.boardState))
+    , button [ class "reset-btn", onClick Reset] [ text "Reset" ]
     ] ]}

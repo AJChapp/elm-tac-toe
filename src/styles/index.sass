@@ -1,14 +1,75 @@
-@import '~bulma/bulma.sass'
+@import '~bulma/bulma.sass';
+@import url('https://fonts.googleapis.com/css?family=Permanent+Marker&display=swap');
 
+/* Variables */
+$square-color: #aba7a7;
+$black: #000000;
 .main
-    text-align: center
-    margin: auto
+    color: $black;
+    text-align: center;
+    margin: auto;
+    font-family: 'Permanent Marker', cursive;
+    max-width: 1000px;
+    border: 7px solid gray;
+    padding-top: 5px;
+    padding-bottom: 50px;
 
+h1
+  font-size: 80px;
+
+h2
+  font-size: 50px;
+
+h3
+  font-size: 30px;
+
+h4
+  font-size: 20px;
+
+.game-header-status-title
+    font-weight: 700;
+    text-decoration: underline;
 
 .game-header-status-content
-    margin-top: 0px
+    margin-top: 0px;
+    margin-bottom: 15px;
+
+.game-content 
+    width: 320px;
+    margin: auto;
+    display: grid;
+    grid-template-rows: repeat(3, 100px);
+    grid-row-gap: 10px;
+    justify-content: center;
+    color: $black;
+    background-color: $black
+
+.row 
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-column-gap: 10px;
 
 .square
-    width: 100px
-    height: 100px
-    font-size: 40px
+    background-color: white;
+    font-size: 60px;
+    border: 0px;
+    transition: all .5s;
+.square:hover
+    background-color: #707070;
+    cursor: pointer;
+
+.reset-btn
+    margin-top: 50px;
+    width: 150px;
+    height: 50px;
+    background-color: #fad96b;
+    transition: all .5s;
+    font-size: 20px;
+    border: 1px solid $black;
+    font-family: 'Permanent Marker', cursive;
+.reset-btn:hover
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #f2d577;
+.reset-btn:active
+    background-color: #c2aa61;
